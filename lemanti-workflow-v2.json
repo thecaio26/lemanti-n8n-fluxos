@@ -1,0 +1,70 @@
+{
+  "name": "Lemanti - Leads com ChatGPT e AI Agent (Vers\u00e3o Corrigida)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "method": "POST",
+        "authentication": "none",
+        "responseFormat": "json",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{\"model\": \"gpt-4o\", \"messages\": [{\"role\": \"system\", \"content\": \"Voc\\u00ea \\u00e9 um vendedor da Lemanti.\"}, {\"role\": \"user\", \"content\": \"Crie uma mensagem apresentando a empresa Lemanti para um lead interessado em {{interesse}}, da empresa {{empresa}}. Convide-o para conhecer nosso cat\\u00e1logo e solu\\u00e7\\u00f5es.\"}]}"
+      },
+      "id": "2",
+      "name": "ChatGPT - Criar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "input": "Mensagem recebida do lead: '{{mensagem}}'. Essa resposta demonstra interesse? Responda apenas com 'Sim' ou 'N\u00e3o'.",
+        "agentId": ""
+      },
+      "id": "3",
+      "name": "AI Agent - Analisar Interesse",
+      "type": "n8n-nodes-base.aiAgent",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Start": [
+      {
+        "node": "ChatGPT - Criar Mensagem",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "ChatGPT - Criar Mensagem": [
+      {
+        "node": "AI Agent - Analisar Interesse",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "AI Agent - Analisar Interesse": []
+  },
+  "settings": {},
+  "tags": [],
+  "versionId": "1",
+  "id": "lemanti-workflow-tested-v2"
+}
