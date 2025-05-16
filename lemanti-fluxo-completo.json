@@ -1,0 +1,127 @@
+{
+  "name": "Lemanti - Fluxo Completo com WhatsApp, Gmail, AI Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "method": "POST",
+        "authentication": "none",
+        "responseFormat": "json",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{\"model\": \"gpt-4o\", \"messages\": [{\"role\": \"system\", \"content\": \"Voc\\u00ea \\u00e9 um vendedor da Lemanti.\"}, {\"role\": \"user\", \"content\": \"Crie uma mensagem profissional apresentando a empresa Lemanti para um lead interessado em {{interesse}}, da empresa {{empresa}}. Convide-o para conhecer nosso cat\\u00e1logo e solu\\u00e7\\u00f5es.\"}]}"
+      },
+      "id": "2",
+      "name": "ChatGPT - Criar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v17.0/YOUR_PHONE_ID/messages",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_ACCESS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "responseFormat": "json",
+        "jsonParameters": true,
+        "bodyParametersJson": "{\"messaging_product\": \"whatsapp\", \"to\": \"{{telefone}}\", \"type\": \"text\", \"text\": {\"body\": \"{{ $json[\\\"mensagemGerada\\\"] }}\"}}"
+      },
+      "id": "3",
+      "name": "Enviar Mensagem WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        750,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "input": "Mensagem recebida do lead: '{{mensagem}}'. Essa resposta demonstra interesse? Responda apenas com 'Sim' ou 'N\u00e3o'.",
+        "agentId": ""
+      },
+      "id": "4",
+      "name": "AI Agent - Verifica Interesse",
+      "type": "n8n-nodes-base.aiAgent",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "input": "Empresa: {{empresa}}, Interesse: {{interesse}}, Regi\u00e3o: {{regiao}}. Escolha o vendedor ideal com base no perfil."
+      },
+      "id": "5",
+      "name": "AI Agent - Escolhe Vendedor",
+      "type": "n8n-nodes-base.aiAgent",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Start": [
+      {
+        "node": "ChatGPT - Criar Mensagem",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "ChatGPT - Criar Mensagem": [
+      {
+        "node": "Enviar Mensagem WhatsApp",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "Enviar Mensagem WhatsApp": [
+      {
+        "node": "AI Agent - Verifica Interesse",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "AI Agent - Verifica Interesse": [
+      {
+        "node": "AI Agent - Escolhe Vendedor",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "AI Agent - Escolhe Vendedor": []
+  },
+  "settings": {},
+  "tags": [],
+  "versionId": "1",
+  "id": "lemanti-fluxo-completo"
+}
